@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Performance Dashboard</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1f4e79;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 10px;
+            border: none;
+            background: #1f4e79;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📊 Student Performance Dashboard</h1>
+
+<div class="container">
+
+    <div class="card">
+        <h3>📌 Student Averages</h3>
+        <div id="averages"></div>
+    </div>
+
+    <div class="card">
+        <h3>Bar Chart</h3>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Line Chart</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Pie Chart</h3>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+
+// -------------------------
+// Data
+// -------------------------
+const students = {
+    "Lorven": {"Math": 85, "Science": 92, "English": 78, "History": 80},
+    "Teena": {"Math": 70, "Science": 75, "English": 82, "History": 68},
+    "Ave": {"Math": 95, "Science": 88, "English": 91, "History": 85},
+    "Petrica": {"Math": 60, "Science": 65, "English": 70, "History": 72},
+    "Robin": {"Math": 88, "Science": 90, "English": 85, "History": 87}
+};
+
+// -------------------------
+// Calculate Averages
+// -------------------------
+let averages = {};
+for (let student in students) {
+    let marks = Object.values(students[student]);
+    let avg = marks.reduce((a,b)=>a+b,0) / marks.length;
+    averages[student] = avg.toFixed(2);
+}
+
+// Display averages
+let avgHTML = "";
+for (let s in averages) {
+    avgHTML += `<p>${s}: ${averages[s]}</p>`;
+}
+document.getElementById("averages").innerHTML = avgHTML;
+
+// -------------------------
+// Bar Chart
+// -------------------------
+new Chart(document.getElementById("barChart"), {
+    type: "bar",
+    data: {
+        labels: Object.keys(averages),
+        datasets: [{
+            label: "Average Marks",
+            data: Object.values(averages)
+        }]
+    }
+});
+
+// -------------------------
+// Line Chart
+// -------------------------
+let subjects = Object.keys(students["Lorven"]);
+
+let datasets = [];
+
+for (let student in students) {
+    datasets.push({
+        label: student,
+        data: Object.values(students[student]),
+        fill: false
+    });
+}
+
+// Class average
+let classAvg = subjects.map(sub =>
+    Object.values(students).reduce((sum, s)=> sum + s[sub],0)/Object.keys(students).length
+);
+
+datasets.push({
+    label: "Class Average",
+    data: classAvg,
+    borderDash: [5,5]
+});
+
+new Chart(document.getElementById("lineChart"), {
+    type: "line",
+    data: {
+        labels: subjects,
+        datasets: datasets
+    }
+});
+
+// -------------------------
+// Pie Chart
+// -------------------------
+let grades = {"A":0,"B":0,"C":0};
+
+for (let avg of Object.values(averages)) {
+    avg = parseFloat(avg);
+    if (avg >= 85) grades["A"]++;
+    else if (avg >= 70) grades["B"]++;
+    else grades["C"]++;
+}
+
+new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+        labels: Object.keys(grades),
+        datasets: [{
+            data: Object.values(grades)
+        }]
+    }
+});
+
+</script>
+
+</body>
+</html>
